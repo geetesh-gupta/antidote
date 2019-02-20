@@ -28,7 +28,8 @@
 
 -module(wait_init).
 
--export([check_ready_nodes/1,
+-export([
+        %check_ready_nodes/1,
          wait_ready/1,
          check_ready/1
         ]).
@@ -39,9 +40,9 @@
 %% and readitem gen_servers have been started.
 %% Returns true if all vnodes are initialized for all physical nodes,
 %% false otherwise
--spec check_ready_nodes([node()]) -> true.
-check_ready_nodes(Nodes) ->
-    lists:all(fun check_ready/1, Nodes).
+% -spec check_ready_nodes([node()]) -> true.
+% check_ready_nodes(Nodes) ->
+%     lists:all(fun check_ready/1, Nodes).
 
 %% @doc This calls the check_ready function repeatedly
 %% until it returns true.

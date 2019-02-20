@@ -174,9 +174,10 @@ perform_singleitem_update(Clock, Key, Type, Params, Properties) ->
     {Transaction, _TransactionId} = create_transaction_record(Clock, false, undefined, true, Properties),
     Partition = ?LOG_UTIL:get_key_partition(Key),
     %% Execute pre_commit_hook if any
-    case antidote_hooks:execute_pre_commit_hook(Key, Type, Params) of
-        {Key, Type, Params1} ->
-            case ?CLOCKSI_DOWNSTREAM:generate_downstream_op(Transaction, Partition, Key, Type, Params1, []) of
+    % case antidote_hooks:execute_pre_commit_hook(Key, Type, Params) of
+    %     {Key, Type, Params1} ->
+    %        case ?CLOCKSI_DOWNSTREAM:generate_downstream_op(Transaction, Partition, Key, Type, Params1, []) of
+            case ?CLOCKSI_DOWNSTREAM:generate_downstream_op(Transaction, Partition, Key, Type, Params, []) of
                 {ok, DownstreamRecord} ->
                     UpdatedPartitions = [{Partition, [{Key, Type, DownstreamRecord}]}],
                     TxId = Transaction#transaction.txn_id,
@@ -192,12 +193,12 @@ perform_singleitem_update(Clock, Key, Type, Params, Properties) ->
                                 {committed, CommitTime} ->
 
                                     %% Execute post commit hook
-                                    case antidote_hooks:execute_post_commit_hook(Key, Type, Params1) of
-                                        {error, Reason} ->
-                                            lager:info("Post commit hook failed. Reason ~p", [Reason]);
-                                        _ ->
-                                            ok
-                                    end,
+                                    % case antidote_hooks:execute_post_commit_hook(Key, Type, Params1) of
+                                    %     {error, Reason} ->
+                                    %         lager:info("Post commit hook failed. Reason ~p", [Reason]);
+                                    %     _ ->
+                                    %         ok
+                                    % end,
 
                                     TxId = Transaction#transaction.txn_id,
                                     DcId = ?DC_META_UTIL:get_my_dc_id(),
@@ -224,10 +225,10 @@ perform_singleitem_update(Clock, Key, Type, Params, Properties) ->
 
                 {error, Reason} ->
                     {error, Reason}
-            end;
+        %     end;
 
-        {error, Reason} ->
-            {error, Reason}
+        % {error, Reason} ->
+        %     {error, Reason}
     end.
 
 %% TODO spec
@@ -975,12 +976,12 @@ perform_update(Op, UpdatedPartitions, Transaction, _Sender, ClientOps) ->
                end,
 
     %% Execute pre_commit_hook if any
-    case antidote_hooks:execute_pre_commit_hook(Key, Type, Update) of
-        {error, Reason} ->
-            lager:debug("Execute pre-commit hook failed ~p", [Reason]),
-            {error, Reason};
+    % case antidote_hooks:execute_pre_commit_hook(Key, Type, Update) of
+    %     {error, Reason} ->
+    %         lager:debug("Execute pre-commit hook failed ~p", [Reason]),
+    %         {error, Reason};
 
-        {Key, Type, PostHookUpdate} ->
+    %     {Key, Type, PostHookUpdate} ->
 
             %% Generate the appropriate state operations based on older snapshots
             GenerateResult = ?CLOCKSI_DOWNSTREAM:generate_downstream_op(
@@ -988,7 +989,8 @@ perform_update(Op, UpdatedPartitions, Transaction, _Sender, ClientOps) ->
                 Partition,
                 Key,
                 Type,
-                PostHookUpdate,
+%                PostHookUpdate,
+                Update,
                 WriteSet
             ),
 
@@ -1008,9 +1010,10 @@ perform_update(Op, UpdatedPartitions, Transaction, _Sender, ClientOps) ->
                         GeneratedUpdate
                     ),
 
-                    UpdatedOps = [{Key, Type, PostHookUpdate} | ClientOps],
+%                    UpdatedOps = [{Key, Type, PostHookUpdate} | ClientOps],
+                    UpdatedOps = [{Key, Type, Update} | ClientOps],
                     {NewUpdatedPartitions, UpdatedOps}
-            end
+%            end
     end.
 
 %% @doc Add new updates to the write set of the given partition.
@@ -1134,15 +1137,15 @@ abort(State = #coord_state{transaction = Transaction,
     end.
 
 
-execute_post_commit_hooks(Ops) ->
-    lists:foreach(fun({Key, Type, Update}) ->
-        case antidote_hooks:execute_post_commit_hook(Key, Type, Update) of
-            {error, Reason} ->
-                lager:info("Post commit hook failed. Reason ~p", [Reason]);
-            _ -> ok
-        end
-                  end, lists:reverse(Ops)).
-
+execute_post_commit_hooks(_Ops) ->
+    % lists:foreach(fun({Key, Type, Update}) ->
+    %     case antidote_hooks:execute_post_commit_hook(Key, Type, Update) of
+    %         {error, Reason} ->
+    %             lager:info("Post commit hook failed. Reason ~p", [Reason]);
+    %         _ -> ok
+    %     end
+    %               end, lists:reverse(Ops)).
+    ok.
 %%%===================================================================
 %%% Unit Tests
 %%%===================================================================

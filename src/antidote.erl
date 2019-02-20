@@ -44,9 +44,9 @@
           create_bucket/2,
           create_object/3,
           delete_object/1,
-          register_pre_hook/3,
-          register_post_hook/3,
-          unregister_hook/2,
+        %   register_pre_hook/3,
+        %   register_post_hook/3,
+        %   unregister_hook/2,
           get_objects/3,
           get_log_operations/1,
           get_default_txn_properties/0,
@@ -56,8 +56,9 @@
 %% Public API
 
 -spec start() -> {ok, _} | {error, term()}.
-start() ->
-    application:ensure_all_started(antidote).
+start() ->     
+    
+    {ok, antidote} = application:ensure_all_started(antidote).
 
 -spec stop() -> ok.
 stop() ->
@@ -102,23 +103,23 @@ delete_object({_Key, _Type, _Bucket}) ->
     %% TODO: Object deletion is not currently supported
     {error, operation_not_supported}.
 
-%% Register a post commit hook.
-%% Module:Function({Key, Type, Op}) will be executed after successful commit of
-%% each transaction that updates Key.
--spec register_post_hook(bucket(), module_name(), function_name()) -> ok | {error, function_not_exported}.
-register_post_hook(Bucket, Module, Function) ->
-    antidote_hooks:register_post_hook(Bucket, Module, Function).
+% %% Register a post commit hook.
+% %% Module:Function({Key, Type, Op}) will be executed after successful commit of
+% %% each transaction that updates Key.
+% -spec register_post_hook(bucket(), module_name(), function_name()) -> ok | {error, function_not_exported}.
+% register_post_hook(Bucket, Module, Function) ->
+%     antidote_hooks:register_post_hook(Bucket, Module, Function).
 
-%% Register a pre commit hook.
-%% Module:Function({Key, Type, Op}) will be executed before executing an update "op"
-%% on key. If pre commit hook fails, transaction will be aborted
--spec register_pre_hook(bucket(), module_name(), function_name()) -> ok | {error, function_not_exported}.
-register_pre_hook(Bucket, Module, Function) ->
-    antidote_hooks:register_pre_hook(Bucket, Module, Function).
+% %% Register a pre commit hook.
+% %% Module:Function({Key, Type, Op}) will be executed before executing an update "op"
+% %% on key. If pre commit hook fails, transaction will be aborted
+% -spec register_pre_hook(bucket(), module_name(), function_name()) -> ok | {error, function_not_exported}.
+% register_pre_hook(Bucket, Module, Function) ->
+%     antidote_hooks:register_pre_hook(Bucket, Module, Function).
 
--spec unregister_hook(pre_commit | post_commit, bucket()) -> ok.
-unregister_hook(Prefix, Bucket) ->
-    antidote_hooks:unregister_hook(Prefix, Bucket).
+% -spec unregister_hook(pre_commit | post_commit, bucket()) -> ok.
+% unregister_hook(Prefix, Bucket) ->
+%     antidote_hooks:unregister_hook(Prefix, Bucket).
 
 
 %% Transaction API %%

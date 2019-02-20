@@ -74,6 +74,7 @@
 
 init_single_dc(Suite, Config) ->
     ct:pal("[~p]", [Suite]),
+    
     test_utils:at_init_testsuite(),
 
     StartDCs = fun(Nodes) ->
@@ -121,30 +122,31 @@ start_node(Name, Config) ->
     case ct_slave:start(Name, NodeConfig) of
         {ok, Node} ->
             PrivDir = proplists:get_value(priv_dir, Config),
-            NodeDir = filename:join([PrivDir, Node]),
+            NodeDir = filename:join(PrivDir, Node),
 
             ct:log("Starting lager"),
             ok = rpc:call(Node, application, set_env, [lager, log_root, NodeDir]),
             ok = rpc:call(Node, application, load, [lager]),
 
-            ct:log("Starting riak_core"),
-            ok = rpc:call(Node, application, load, [riak_core]),
+            % ct:log("Starting riak_core"),
+            % ok = rpc:call(Node, application, load, [riak_core]),
 
 
-            PlatformDir = NodeDir ++ "/data/",
-            RingDir = PlatformDir ++ "/ring/",
+            PlatformDir = filename:join(NodeDir, "data"),
+            RingDir = filename:join(PlatformDir, "ring"),
             NumberOfVNodes = 4,
-            filelib:ensure_dir(PlatformDir),
-            filelib:ensure_dir(RingDir),
+            ok = filelib:ensure_dir(PlatformDir),
+            ok = filelib:ensure_dir(RingDir),
 
+            ct:log("Ringdir: ~p",[RingDir]),
             ct:log("Setting environment for riak"),
-            ok = rpc:call(Node, application, set_env, [riak_core, riak_state_dir, RingDir]),
-            ok = rpc:call(Node, application, set_env, [riak_core, ring_creation_size, NumberOfVNodes]),
+            ok = rpc:call(Node, application, set_env, [antidote, ring_state_dir, RingDir]),
+            ok = rpc:call(Node, application, set_env, [antidote, ring_creation_size, NumberOfVNodes]),
 
-            ok = rpc:call(Node, application, set_env, [riak_core, platform_data_dir, PlatformDir]),
-            ok = rpc:call(Node, application, set_env, [riak_core, handoff_port, web_ports(Name) + 3]),
+            ok = rpc:call(Node, application, set_env, [antidote, platform_data_dir, PlatformDir]),
+            ok = rpc:call(Node, application, set_env, [antidote, handoff_port, web_ports(Name) + 3]),
 
-            ok = rpc:call(Node, application, set_env, [riak_core, schema_dirs, ["../../_build/default/rel/antidote/lib/"]]),
+            ok = rpc:call(Node, application, set_env, [antidote, schema_dirs, ["../../_build/default/rel/antidote/lib/"]]),
 
             ok = rpc:call(Node, application, set_env, [ranch, pb_port, web_ports(Name) + 2]),
 
@@ -154,7 +156,7 @@ start_node(Name, Config) ->
             ok = rpc:call(Node, application, set_env, [antidote, logreader_port, web_ports(Name)]),
             ok = rpc:call(Node, application, set_env, [antidote, metrics_port, web_ports(Name) + 4]),
 
-            {ok, _} = rpc:call(Node, application, ensure_all_started, [antidote]),
+            {ok, antidote} = rpc:call(Node, application, ensure_all_started, [antidote]),
             ct:pal("Node ~p started with ports ~p-~p", [Node, web_ports(Name), web_ports(Name)+4]),
 
             Node;

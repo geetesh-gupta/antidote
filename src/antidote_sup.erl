@@ -55,6 +55,7 @@ start_link() ->
 %% ===================================================================
 
 init(_Args) ->
+            ct:log("PANIK in antidote_sup"),
     LoggingMaster = {logging_vnode_master,
                      {riak_core_vnode_master, start_link, [logging_vnode]},
                      permanent, 5000, worker, [riak_core_vnode_master]},
@@ -89,7 +90,7 @@ init(_Args) ->
     InterDcDepVnode = ?VNODE(inter_dc_dep_vnode_master, inter_dc_dep_vnode),
     InterDcLogReaderQMaster = ?CHILD(inter_dc_query, worker, []),
     InterDcLogReaderRMaster = ?CHILD(inter_dc_query_receive_socket, worker, []),
-    InterDcLogSenderMaster = ?VNODE(inter_dc_log_sender_vnode_master, inter_dc_log_sender_vnode),
+    %InterDcLogSenderMaster = ?VNODE(inter_dc_log_sender_vnode_master, inter_dc_log_sender_vnode),
 
 
     MetaDataManagerSup = {meta_data_manager_sup,
@@ -148,7 +149,7 @@ init(_Args) ->
        InterDcDepVnode,
        InterDcLogReaderQMaster,
        InterDcLogReaderRMaster,
-       InterDcLogSenderMaster,
+       %InterDcLogSenderMaster,
        StableMetaData,
        MetaDataManagerSup,
        MetaDataSenderSup,

@@ -215,7 +215,9 @@ ensure_local_vnodes_running_master(VnodeType) ->
 -spec ensure_all_vnodes_running_master(atom()) -> ok.
 ensure_all_vnodes_running_master(VnodeType) ->
     check_registered(VnodeType),
-    bcast_vnode_check_up(VnodeType, {hello}, get_all_partitions()).
+    lager:error("~p is registered", [VnodeType]),
+    bcast_vnode_check_up(VnodeType, {hello}, get_all_partitions()),
+    lager:error("~p is up", [VnodeType]).
 
 %% Prints to the console the staleness between this DC and all
 %% other DCs that it is connected to

@@ -267,17 +267,17 @@ handle_overload_info(_, _) ->
 handle_exit(_Pid, _Reason, State) ->
     {noreply, State}.
 
-terminate(_Reason, _State=#state{ops_cache=OpsCache, snapshot_cache=SnapshotCache}) ->
-    try
-        ets:delete(OpsCache),
-        ets:delete(SnapshotCache)
-    catch
-        _:_Reason->
-            ok
-    end,
-    ok.
+% terminate(_Reason, _State=#state{ops_cache=OpsCache, snapshot_cache=SnapshotCache}) ->
+%     try
+%         ets:delete(OpsCache),
+%         ets:delete(SnapshotCache)
+%     catch
+%         _:_Reason->
+%             ok
+%     end,
+%     ok.
 
-
+terminate( _, _) -> ok.
 
 %%---------------- Internal Functions -------------------%%
 

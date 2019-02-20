@@ -114,7 +114,7 @@ start_bg_processes(MetaDataName) ->
     %% Start the meta-data senders
     Nodes = dc_utilities:get_my_dc_nodes(),
     %% Ensure vnodes are running and meta_data
-    ok = dc_utilities:ensure_all_vnodes_running_master(inter_dc_log_sender_vnode_master),
+    %ok = dc_utilities:ensure_all_vnodes_running_master(inter_dc_log_sender_vnode_master),
     ok = dc_utilities:ensure_all_vnodes_running_master(clocksi_vnode_master),
     ok = dc_utilities:ensure_all_vnodes_running_master(logging_vnode_master),
     ok = dc_utilities:ensure_all_vnodes_running_master(materializer_vnode_master),
